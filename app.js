@@ -4,6 +4,7 @@ const shopRouter = require('./routes/shop')
 const bodyParser = require('body-parser')
 // const expresshbs = require("express-handlebars")
 const path = require('path')
+const error404 = require('./controllers/error')
 
 const app = express()
 
@@ -18,9 +19,6 @@ app.use('/admin', adminRouter.routes)
 
 app.use(shopRouter)
 
-app.use((req, res) => {
-    // res.status(404).sendFile(path.join(__dirname, 'views', '404.html'))
-    res.render('404', {docTitle: "404 - Page not found"})
-})
+app.use(error404.get404)
 
 app.listen(3000)
