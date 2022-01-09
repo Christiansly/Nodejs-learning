@@ -28,3 +28,20 @@ exports.getCheckout = (req, res) => {
         docTitle: "Checkout"
     })
 }
+
+exports.getOrders = (req, res) => {
+    res.render('shop/orders', {
+        path: '/orders',
+        docTitle: "Orders"
+    })
+}
+
+exports.getProduct = (req, res) => {
+    console.log(req.params.productId)
+    const prodId = req.params.productId
+    Product.findById(prodId, (prod) => {
+        console.log(prod)
+        res.render('shop/product-detail', {path: "/product-detail", product: prod, docTitle: prod.title})
+    })
+    
+} 
