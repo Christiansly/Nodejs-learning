@@ -7,16 +7,14 @@ exports.getProductPage = (req, res) => {
 }
 
 exports.postProductPage = (req, res) => {
-    const product = new Product(req.body.title)
+    const {title, price, description, imageUrl} = req.body
+    const product = new Product(req.body.title, req.body.description, req.body.imageUrl, req.body.price)
     product.save()
     res.redirect('/')
 }
 
 exports.getProducts = (req, res) => {
-   
-    const products = Product.fetchAll((products) => {
-        res.render('shop/product-list', {prod: products, docTitle: 'Shop', path: '/', hasProducts: products.length > 0, activeShop: true})
+    Product.fetchAll((products) => {
+        res.render('admin/products', {prod: products, docTitle: 'Admin Product', path: '/admin/products', hasProducts: products.length > 0, activeShop: true})
     })
-    // res.sendFile(path.join(routeDir, 'views', 'shop.html'))
-    
 }
