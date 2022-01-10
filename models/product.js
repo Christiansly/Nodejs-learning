@@ -16,7 +16,8 @@ const getProductsFromFile = cb => {
 
 // const products = []
 module.exports = class Product {
-    constructor(title, description, imageUrl, price) {
+    constructor(id, title, description, imageUrl, price) {
+        this.id = id
         this.title = title
         this.description = description
         this.imageUrl = imageUrl
@@ -24,12 +25,23 @@ module.exports = class Product {
     }
 
     save() {
-        this.id = Math.random() + ""
+        
         getProductsFromFile((products) => {
-            products.push(this)
-            fs.writeFile(p, JSON.stringify(products), (err) => {
-                console.log(err)
-            })
+            if(this.id) {
+                const existingProductIndex = products.findIndex(prod => prod.id === this.id)
+                const updatedProducts = [...products]
+                updatedProducts[existingProductIndex] = this
+                fs.writeFile(p, JSON.stringify(updatedProducts), (err) => {
+                    console.log(err)
+                })
+            } else {
+                this.id = Math.random() + ""
+                products.push(this)
+                fs.writeFile(p, JSON.stringify(products), (err) => {
+                    console.log(err)
+                })
+            }
+            
         })
         // products.push(this)
     }
@@ -45,6 +57,15 @@ module.exports = class Product {
         getProductsFromFile(products => {
             const prod = products.find(p => p.id === id)
             cb(prod)
+        })
+    }
+
+    static deleteProduct(id) {
+        getProductsFromFile(products => {
+            const prods = products.filter(prod => prod.id !== id)
+            fs.writeFile(p, JSON.stringify(prods), (err) => {
+                console.log(err)
+            })
         })
     }
 }
