@@ -3,7 +3,7 @@ const Product = require('../models/product')
 exports.getProductPage = (req, res) => {
     // res.send('<form action="/admin/add-product" method="POST"><input type="text" name="title"></input><button>Submit</button></form>')
     // res.sendFile(path.join(routeDir, 'views', 'add-product.html'))
-    res.render('admin/add-product', {docTitle: "Add Product", path: "/admin/add-product", activeProd: true, productCSS: true})
+    res.render('admin/edit-product', {docTitle: "Add Product", path: "/admin/add-product", editing: false, activeProd: true, productCSS: true})
 }
 
 exports.postProductPage = (req, res) => {
@@ -11,6 +11,28 @@ exports.postProductPage = (req, res) => {
     const product = new Product(req.body.title, req.body.description, req.body.imageUrl, req.body.price)
     product.save()
     res.redirect('/')
+}
+
+exports.getEditProduct = (req, res) => {
+    // res.send('<form action="/admin/add-product" method="POST"><input type="text" name="title"></input><button>Submit</button></form>')
+    // res.sendFile(path.join(routeDir, 'views', 'add-product.html'))
+
+    const {edit} = req.query
+    if(!edit) {
+        return res.redirect('/')
+    }
+    const {productId} = req.params
+    Product.findById(productId, product => {
+        if(!product) {
+            return res.redirect('/')
+        }
+        res.render('admin/edit-product', {
+            docTitle: "Edit Product",
+            path: '/admin/edit-product',
+            editing: edit,
+            product: product
+        })
+    })
 }
 
 exports.getProducts = (req, res) => {
