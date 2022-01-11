@@ -45,6 +45,7 @@ module.exports = class Cart {
           const cart = JSON.parse(fileContent);
           const updatedCart = {...cart}
           const product = updatedCart.products.find(product => product.id === id)
+          if(!product) return
           const productQty = product.qty
           updatedCart.products = updatedCart.products.filter(prod => prod.id !== id)
           updatedCart.totalPrice -= productPrice * productQty
@@ -53,6 +54,16 @@ module.exports = class Cart {
           });
         } else {
             return
+        }
+    })
+  }
+
+  static getCart(cb) {
+    fs.readFile(p, (err, fileContent) => {
+        if(err) {
+            cb(null)
+        } else {
+            cb(JSON.parse(fileContent))
         }
     })
   }
