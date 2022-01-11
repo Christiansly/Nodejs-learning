@@ -1,6 +1,7 @@
 const fs = require("fs")
 const path = require("path")
 const customizePath = require('../util/path')
+const Cart = require("./cart")
 const p = path.join(customizePath, 'data', 'products.json')
 const getProductsFromFile = cb => {
     
@@ -62,9 +63,13 @@ module.exports = class Product {
 
     static deleteProduct(id) {
         getProductsFromFile(products => {
+            const prod = products.find(prod => prod.id === id)
             const prods = products.filter(prod => prod.id !== id)
             fs.writeFile(p, JSON.stringify(prods), (err) => {
                 console.log(err)
+                if(!err) {
+                    Cart.deleteProduct(id, prod.price)
+                }
             })
         })
     }
