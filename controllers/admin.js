@@ -1,3 +1,4 @@
+const { ObjectId } = require('mongodb')
 const Product = require('../models/product')
 const { getDB } = require('../util/database')
 
@@ -28,7 +29,7 @@ exports.getEditProduct = (req, res) => {
         return res.redirect('/')
     }
     const {productId} = req.params
-    Product.findById(productId, product => {
+    Product.findById(productId).then(product => {
         if(!product) {
             return res.redirect('/')
         }
@@ -43,9 +44,14 @@ exports.getEditProduct = (req, res) => {
 
 exports.postEditProduct = (req, res) => {
     const {productId, title, price, description, imageUrl} = req.body
-    const updatedProduct = new Product(productId, title, description, imageUrl, price)
-    updatedProduct.save()
-    res.redirect('/admin/products')
+    const updatedProduct = new Product(new ObjectId(productId), title, description, imageUrl, price)
+    updatedProduct.save().then(result => {
+        console.log("Updated")
+        res.redirect('/admin/products')
+    }).catch(err => {
+        console.log(err)
+    })
+    
 }
 
 exports.postDeleteProduct = (req, res) => {

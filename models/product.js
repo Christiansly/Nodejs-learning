@@ -2,6 +2,8 @@ const fs = require("fs")
 const path = require("path")
 const { getDB } = require("../util/database")
 const customizePath = require('../util/path')
+
+
 const Cart = require("./cart")
 // const p = path.join(customizePath, 'data', 'products.json')
 const mongodb = require('mongodb')
@@ -20,16 +22,23 @@ const getProductsFromFile = cb => {
 // const products = []
 module.exports = class Product {
     constructor(id, title, description, imageUrl, price) {
-        this.id = id
+        
         this.title = title
         this.description = description
         this.imageUrl = imageUrl
         this.price = price
+        this._id = id
     }
 
     save() {
         const db = getDB()
-        return db.collection('products').insertOne(this).then(result => console.log(result)).catch(err => console.log(err))
+        let dbOperation
+        if(this._id) {
+            dbOperation = db.collection('products').updateOne({_id: this._id}, {$set: this})
+        }else {
+            dbOperation = db.collection('products').insertOne(this)
+        }
+        return dbOperation.then(result => console.log(result)).catch(err => console.log(err))
         // products.push(this)
     }
 
