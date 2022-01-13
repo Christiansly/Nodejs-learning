@@ -10,7 +10,8 @@ exports.getProductPage = (req, res) => {
 
 exports.postProductPage = (req, res) => {
     const {title, price, description, imageUrl} = req.body
-    const product = new Product(req.body.title, req.body.description, req.body.imageUrl, req.body.price)
+    let id
+    const product = new Product(id, req.body.title, req.body.description, req.body.imageUrl, req.body.price)
     product.save().then(result => {
         console.log('Created Product')
         res.redirect('/admin/products')
@@ -44,7 +45,7 @@ exports.getEditProduct = (req, res) => {
 
 exports.postEditProduct = (req, res) => {
     const {productId, title, price, description, imageUrl} = req.body
-    const updatedProduct = new Product(new ObjectId(productId), title, description, imageUrl, price)
+    const updatedProduct = new Product(productId, title, description, imageUrl, price)
     updatedProduct.save().then(result => {
         console.log("Updated")
         res.redirect('/admin/products')

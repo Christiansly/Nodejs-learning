@@ -6,7 +6,7 @@ const customizePath = require('../util/path')
 
 const Cart = require("./cart")
 // const p = path.join(customizePath, 'data', 'products.json')
-const mongodb = require('mongodb')
+const {ObjectId} = require('mongodb')
 const getProductsFromFile = cb => {
     
     fs.readFile(p, (err, fileContent) => {
@@ -27,7 +27,7 @@ module.exports = class Product {
         this.description = description
         this.imageUrl = imageUrl
         this.price = price
-        this._id = id
+        if(id) this._id = new ObjectId(id)
     }
 
     save() {
@@ -56,7 +56,7 @@ module.exports = class Product {
     static findById(id, cb) {
         const db = getDB()
         
-        return db.collection('products').find({_id: new mongodb.ObjectId(id)}).next().then(product => {
+        return db.collection('products').find({_id: new ObjectId(id)}).next().then(product => {
             console.log(product)
             return product
         }).catch(err => {
