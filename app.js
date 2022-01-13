@@ -5,6 +5,8 @@ const bodyParser = require('body-parser')
 // const expresshbs = require("express-handlebars")
 const path = require('path')
 const error404 = require('./controllers/error')
+const {mongoConnect} = require('./util/database')
+
 
 const app = express()
 
@@ -21,4 +23,7 @@ app.use(shopRouter)
 
 app.use(error404.get404)
 
-app.listen(3000)
+mongoConnect(()=> {
+    // console.log(client)
+    app.listen(3000)
+})

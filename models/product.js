@@ -1,8 +1,10 @@
 const fs = require("fs")
 const path = require("path")
+const { getDB } = require("../util/database")
 const customizePath = require('../util/path')
 const Cart = require("./cart")
-const p = path.join(customizePath, 'data', 'products.json')
+// const p = path.join(customizePath, 'data', 'products.json')
+const mongodb = require('mongodb')
 const getProductsFromFile = cb => {
     
     fs.readFile(p, (err, fileContent) => {
@@ -26,38 +28,30 @@ module.exports = class Product {
     }
 
     save() {
-        
-        getProductsFromFile((products) => {
-            if(this.id) {
-                const existingProductIndex = products.findIndex(prod => prod.id === this.id)
-                const updatedProducts = [...products]
-                updatedProducts[existingProductIndex] = this
-                fs.writeFile(p, JSON.stringify(updatedProducts), (err) => {
-                    console.log(err)
-                })
-            } else {
-                this.id = Math.random() + ""
-                products.push(this)
-                fs.writeFile(p, JSON.stringify(products), (err) => {
-                    console.log(err)
-                })
-            }
-            
-        })
+        const db = getDB()
+        return db.collection('products').insertOne(this).then(result => console.log(result)).catch(err => console.log(err))
         // products.push(this)
     }
 
     static fetchAll(cb) {
-       
-        const p = path.join(customizePath, 'data', 'products.json')
-       getProductsFromFile(cb)
+        const db = getDB()
+        return db.collection('products').find().toArray().then(products => {
+            console.log(products);
+            return products
+        }).catch(err => {
+            console.log(err)
+        })
        
     }
 
     static findById(id, cb) {
-        getProductsFromFile(products => {
-            const prod = products.find(p => p.id === id)
-            cb(prod)
+        const db = getDB()
+        
+        return db.collection('products').find({_id: new mongodb.ObjectId(id)}).next().then(product => {
+            console.log(product)
+            return product
+        }).catch(err => {
+            console.log(err)
         })
     }
 
