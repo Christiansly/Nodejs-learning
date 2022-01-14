@@ -14,8 +14,13 @@ class User {
 
     static findById(userId) {
         const db = getDB()
-        return db.collections('users').findOne({_id: new ObjectId(userId)}).next().then(() => console.log("Fetched")).catch((err) => console.log(err))
-    }
+        return db.collection('users').find({_id: new ObjectId(userId)}).next().then(user => {
+            console.log(user)
+            return user
+        }).catch(err => {
+            console.log(err)
+        })
+    } 
 }
 
 

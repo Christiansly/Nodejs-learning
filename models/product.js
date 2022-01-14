@@ -21,13 +21,14 @@ const getProductsFromFile = cb => {
 
 // const products = []
 module.exports = class Product {
-    constructor(id, title, description, imageUrl, price) {
+    constructor(id, title, description, imageUrl, price, user) {
         
         this.title = title
         this.description = description
         this.imageUrl = imageUrl
         this.price = price
         if(id) this._id = new ObjectId(id)
+        this.user = user
     }
 
     save() {

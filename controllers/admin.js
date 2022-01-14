@@ -11,7 +11,7 @@ exports.getProductPage = (req, res) => {
 exports.postProductPage = (req, res) => {
     const {title, price, description, imageUrl} = req.body
     let id
-    const product = new Product(id, req.body.title, req.body.description, req.body.imageUrl, req.body.price)
+    const product = new Product(id, req.body.title, req.body.description, req.body.imageUrl, req.body.price, req.user._id)
     product.save().then(result => {
         console.log('Created Product')
         res.redirect('/admin/products')
