@@ -6,6 +6,7 @@ const bodyParser = require('body-parser')
 const path = require('path')
 const error404 = require('./controllers/error')
 const {mongoConnect} = require('./util/database')
+const User = require('./models/user')
 
 
 const app = express()
@@ -17,6 +18,15 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 app.set('view engine', 'ejs')
 app.set('views', 'views')
+
+app.use((req, res, next) => {
+    User.findById("61e09a39b61cbe5835c751f5").then(user => {
+        req.user = user
+        next()}
+        ).catch(err => console.log(err))
+
+    next() 
+})
 app.use('/admin', adminRouter.routes)
 
 app.use(shopRouter)
