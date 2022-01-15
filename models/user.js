@@ -4,7 +4,7 @@ const { getDB } = require("../util/database")
 class User {
     constructor(email, username) {
         this.email = email
-        this.username = username
+        this.username = username 
     }
 
     save() {
