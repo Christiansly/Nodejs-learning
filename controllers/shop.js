@@ -64,10 +64,7 @@ exports.getProduct = (req, res) => {
 
 exports.postCart = (req, res) => {
     const {productId} = req.body
-    Product.findById(productId, (prod) => {
-        Cart.addProduct(prod.id, prod.price)
-        res.redirect('/cart')
-    })
+    Product.findById(productId).then(prod => req.user.addToCart(prod)).then(result => console.log(result)).catch(err => console.log(err))
 }
 
 exports.postCartDeleteProduct = (req, res) => {

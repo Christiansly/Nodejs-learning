@@ -21,10 +21,9 @@ app.set('views', 'views')
 
 app.use((req, res, next) => {
     User.findById("61e09a39b61cbe5835c751f5").then(user => {
-        req.user = user
+        req.user = new User(user.email, user.username, user.cart, user._id)
         next()}
         ).catch(err => console.log(err))
-
     
 })
 app.use('/admin', adminRouter.routes)
