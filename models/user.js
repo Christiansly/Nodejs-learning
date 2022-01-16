@@ -15,7 +15,7 @@ class User {
     }
 
     addToCart(product) {
-        const updatedCart = {items: [{...product, quantity: 1}]}
+        const updatedCart = {items: [{productId: ObjectId(product._id), quantity: 1}]}
         const db = getDB()
         return db.collection('users').updateOne({_id: this._id}, {$set: {cart: updatedCart}}).then(() => console.log("Cart Added")).catch((err) => console.log(err))
     }
