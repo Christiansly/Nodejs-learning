@@ -46,6 +46,28 @@ class User {
 
     }
 
+    addToOrder() {
+        const db = getDB()
+        return this.getCart().then(products => {
+            const order = {
+                items: products,
+                user: {
+                    _id: new ObjectId(this._id),
+                    username: this.username
+                }
+            }
+            return db.collection('orders').insertOne(order)
+        }).then(() => {
+            this.cart = {items: []}
+            return db.collection('users').updateOne({_id: this._id}, {$set: {cart: {items: []}}})
+        })
+    }
+
+    getOrder() {
+        const db = getDB()
+        return db.collection('orders').find({'user._id': new ObjectId(this._id)}).toArray()
+    }
+
     getCart() {
         const db = getDB()
         const productsId = this.cart.items.map(prod => prod.productId)

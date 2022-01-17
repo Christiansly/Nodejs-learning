@@ -38,10 +38,14 @@ exports.getCheckout = (req, res) => {
 }
 
 exports.getOrders = (req, res) => {
-    res.render('shop/orders', {
-        path: '/orders',
-        docTitle: "Orders"
+    req.user.getOrder().then(items => {
+        res.render('shop/orders', {
+            path: '/orders',
+            docTitle: "Orders",
+            orders: items
+        }) 
     })
+    
 }
 
 exports.getProduct = (req, res) => {
@@ -69,4 +73,11 @@ exports.postCartDeleteProduct = (req, res) => {
         res.redirect('/cart')
     })
     
+}
+
+exports.postOrder = (req, res) => {
+    req.user.addToOrder().then(result => {
+        console.log("Add to Order")
+        res.redirect('/cart')
+    })
 }
