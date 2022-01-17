@@ -35,6 +35,17 @@ class User {
         return db.collection('users').updateOne({_id: this._id}, {$set: {cart: updatedCart}}).then(() => console.log("Cart Added")).catch((err) => console.log(err))
     }
 
+    deleteCart(productId) {
+        const updatedCartItems = this.cart.items.filter(i => {
+            return i.productId.toString() !== productId.toString()
+        })
+        const updatedCart = {items: updatedCartItems}
+
+        const db = getDB()
+        return db.collection('users').updateOne({_id: this._id}, {$set: {cart: updatedCart}}).then(() => console.log("Item Deleted")).catch((err) => console.log(err))
+
+    }
+
     getCart() {
         const db = getDB()
         const productsId = this.cart.items.map(prod => prod.productId)
