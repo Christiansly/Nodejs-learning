@@ -5,15 +5,15 @@ exports.getProducts = (req, res) => {
    
   
     
-    Product.fetchAll().then(products => {
+    Product.find().then(products => {
         res.render('shop/product-list', {prod: products, docTitle: 'All Products', path: '/products'})
     })
     // res.sendFile(path.join(routeDir, 'views', 'shop.html'))
-    
+     
 }
 
 exports.getIndex = (req, res) => {
-    const products = Product.fetchAll().then((products) => {
+    const products = Product.find().then((products) => {
     res.render('shop/index', {prod: products, docTitle: 'Shop', path: '/', hasProducts: products.length > 0, activeShop: true})
     }).catch(err => console.log(err))
 }
