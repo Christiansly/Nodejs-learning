@@ -15,7 +15,8 @@ exports.postProductPage = (req, res) => {
         title: title,
         price: price,
         description: description,
-        imageUrl: imageUrl
+        imageUrl: imageUrl,
+        userId: req.user
     })
     product.save().then(result => {
         console.log('Created Product')
@@ -25,6 +26,8 @@ exports.postProductPage = (req, res) => {
     })
     
 }
+
+//select() - choose the fields you want to get. populate() - get referemce model
 
 exports.getEditProduct = (req, res) => {
     // res.send('<form action="/admin/add-product" method="POST"><input type="text" name="title"></input><button>Submit</button></form>')
@@ -70,7 +73,7 @@ exports.postEditProduct = (req, res) => {
 exports.postDeleteProduct = (req, res) => {
     const {productId} = req.body
     console.log(productId)
-    Product.deleteProduct(productId).then(() => res.redirect('/admin/products')).catch((err) => console.log(err))
+    Product.findByIdAndRemove(productId).then(() => res.redirect('/admin/products')).catch((err) => console.log(err))
     
 }
 
