@@ -14,8 +14,11 @@ exports.getProducts = (req, res) => {
 }
 
 exports.getIndex = (req, res) => {
+    // req.isLoggedIn = true
+    console.log("isLoggedIn", req.isLoggedIn)
     const products = Product.find().then((products) => {
-    res.render('shop/index', {prod: products, docTitle: 'Shop', path: '/', hasProducts: products.length > 0, activeShop: true})
+    res.render('shop/index', {prod: products, docTitle: 'Shop', path: '/', hasProducts: products.length > 0, activeShop: true,
+    isLoggedIn: req.isLoggedIn})
     }).catch(err => console.log(err))
 }
 
@@ -28,7 +31,8 @@ exports.getCart = (req, res) => {
             res.render('shop/cart', {
                 path: '/cart',
                 docTitle: "Your Cart",
-                products: prod
+                products: prod,
+                isLoggedIn: req.isLoggedIn
             })
         })
 }
@@ -36,7 +40,8 @@ exports.getCart = (req, res) => {
 exports.getCheckout = (req, res) => {
     res.render('shop/checkout', {
         path: '/checkout',
-        docTitle: "Checkout"
+        docTitle: "Checkout",
+        isLoggedIn: req.isLoggedIn
     })
 }
 
@@ -51,7 +56,8 @@ exports.getOrders = (req, res) => {
             path: '/orders',
             docTitle: "Orders",
             orders: items,
-            total: total
+            total: total,
+            isLoggedIn: req.isLoggedIn
         }) 
     })
     
@@ -62,7 +68,8 @@ exports.getProduct = (req, res) => {
     const prodId = req.params.productId
     Product.findById(prodId).then(prod => {
         console.log(prod)
-        res.render('shop/product-detail', {path: "/product-detail", product: prod, docTitle: prod.title})
+        res.render('shop/product-detail', {path: "/product-detail", product: prod, docTitle: prod.title,
+        isLoggedIn: req.isLoggedIn})
     }).catch(err => console.log(err))
     
 } 

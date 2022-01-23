@@ -1,6 +1,7 @@
 const express = require('express')
 const adminRouter = require('./routes/admin')
 const shopRouter = require('./routes/shop')
+const authRouter = require('./routes/auth')
 const bodyParser = require('body-parser')
 // const expresshbs = require("express-handlebars")
 const path = require('path')
@@ -9,18 +10,27 @@ const error404 = require('./controllers/error')
 const User = require('./models/user')
 const mongoose = require('mongoose')
 const user = require('./models/user')
-const { use } = require('./routes/shop')
-
+// const { use } = require('./routes/shop')
+const session = require('express-session')
+const MongoDBStore = require('connect-mongodb-session')(session)
+const MONGO_URI = "mongodb+srv://admin:admin@cluster0.qfbbp.mongodb.net/shop?retryWrites=true&w=majority"
 
 const app = express()
-
-app.use(bodyParser.urlencoded({extended: false}))
-app.use(express.static(path.join(__dirname, 'public')))
-
-// app.engine('hbs', expresshbs({layoutDir: 'views/layouts/', defaultLayout: 'main-layout', extname: 'hbs'}))
+const store = new MongoDBStore({
+    uri: MONGO_URI,
+    collection: 'sessions'
+})
 
 app.set('view engine', 'ejs')
 app.set('views', 'views')
+
+app.use(bodyParser.urlencoded({extended: false}))
+app.use(express.static(path.join(__dirname, 'public')))
+app.use(session({secret: 'my secret', resave: false, saveUninitialized: false, store: store}))
+
+// app.engine('hbs', expresshbs({layoutDir: 'views/layouts/', defaultLayout: 'main-layout', extname: 'hbs'}))
+
+
 
 app.use((req, res, next) => {
     User.findById("61eb36deb03a84a967accf51").then(user => {
@@ -32,6 +42,7 @@ app.use((req, res, next) => {
 app.use('/admin', adminRouter.routes)
 
 app.use(shopRouter)
+app.use(authRouter)
 
 app.use(error404.get404)
 
@@ -39,7 +50,7 @@ app.use(error404.get404)
 //     // console.log(client)
 //     app.listen(3000)
 // })
-mongoose.connect("mongodb+srv://admin:admin@cluster0.qfbbp.mongodb.net/shop?retryWrites=true&w=majority")
+mongoose.connect(MONGO_URI)
 .then(result => {
     User.findOne().then(user => {
         if(!user) {
