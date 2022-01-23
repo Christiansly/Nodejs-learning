@@ -12,6 +12,7 @@ const mongoose = require('mongoose')
 const user = require('./models/user')
 // const { use } = require('./routes/shop')
 const session = require('express-session')
+const { nextTick } = require('process')
 const MongoDBStore = require('connect-mongodb-session')(session)
 const MONGO_URI = "mongodb+srv://admin:admin@cluster0.qfbbp.mongodb.net/shop?retryWrites=true&w=majority"
 
@@ -31,14 +32,23 @@ app.use(session({secret: 'my secret', resave: false, saveUninitialized: false, s
 // app.engine('hbs', expresshbs({layoutDir: 'views/layouts/', defaultLayout: 'main-layout', extname: 'hbs'}))
 
 
-
 app.use((req, res, next) => {
-    User.findById("61eb36deb03a84a967accf51").then(user => {
+    console.log(req.session.user)
+    if(req.session.user === undefined) {
+        console.log(req.session.user)
+        next()
+    } else {
+    User.findOne({email: req.session.user[0]['email']})
+    .then(user => {
         req.user = user
-        next()}
-        ).catch(err => console.log(err))
-    
+        console.log('jhjhjj' ,user)
+        next()
+        }
+        )
+        .catch(err => console.log(err))
+    }
 })
+ 
 app.use('/admin', adminRouter.routes)
 
 app.use(shopRouter)

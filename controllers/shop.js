@@ -7,7 +7,7 @@ exports.getProducts = (req, res) => {
   
     
     Product.find().then(products => {
-        res.render('shop/product-list', {prod: products, docTitle: 'All Products', path: '/products'})
+        res.render('shop/product-list', {prod: products, docTitle: 'All Products', path: '/products', isLoggedIn: req.session.isLoggedIn})
     })
     // res.sendFile(path.join(routeDir, 'views', 'shop.html'))
      
@@ -15,10 +15,10 @@ exports.getProducts = (req, res) => {
 
 exports.getIndex = (req, res) => {
     // req.isLoggedIn = true
-    console.log("isLoggedIn", req.isLoggedIn)
+    console.log("isLoggedIn", req.session.isLoggedIn)
     const products = Product.find().then((products) => {
     res.render('shop/index', {prod: products, docTitle: 'Shop', path: '/', hasProducts: products.length > 0, activeShop: true,
-    isLoggedIn: req.isLoggedIn})
+    isLoggedIn: req.session.isLoggedIn})
     }).catch(err => console.log(err))
 }
 
@@ -32,7 +32,7 @@ exports.getCart = (req, res) => {
                 path: '/cart',
                 docTitle: "Your Cart",
                 products: prod,
-                isLoggedIn: req.isLoggedIn
+                isLoggedIn: req.session.isLoggedIn
             })
         })
 }
@@ -41,13 +41,13 @@ exports.getCheckout = (req, res) => {
     res.render('shop/checkout', {
         path: '/checkout',
         docTitle: "Checkout",
-        isLoggedIn: req.isLoggedIn
+        isLoggedIn: req.session.isLoggedIn
     })
 }
 
 exports.getOrders = (req, res) => {
     
-    Order.find({'user.userId': req.user._id}).then(items => {
+    Order.find({'user.userId': req.session.user._id}).then(items => {
         let total = items.map(item => {
             return item.products.reduce((prev, curr) => {return curr.quantity * curr.product.price + prev}, 0)
         }).reduce((prev, curr) => { return prev + curr}, 0)
@@ -57,7 +57,7 @@ exports.getOrders = (req, res) => {
             docTitle: "Orders",
             orders: items,
             total: total,
-            isLoggedIn: req.isLoggedIn
+            isLoggedIn: req.session.isLoggedIn
         }) 
     })
     
@@ -69,7 +69,7 @@ exports.getProduct = (req, res) => {
     Product.findById(prodId).then(prod => {
         console.log(prod)
         res.render('shop/product-detail', {path: "/product-detail", product: prod, docTitle: prod.title,
-        isLoggedIn: req.isLoggedIn})
+        isLoggedIn: req.session.isLoggedIn})
     }).catch(err => console.log(err))
     
 } 
@@ -83,7 +83,7 @@ exports.postCart = (req, res) => {
 
 exports.postCartDeleteProduct = (req, res) => {
     const {productId} = req.body 
-    console.log(req.user)
+    console.log(req.session.user)
     req.user.deleteCart(productId).then(prod => {
 
         res.redirect('/cart')
@@ -107,6 +107,7 @@ exports.postOrder = (req, res) => {
     }).then(result => req.user.clearCart()).then(result => {
             console.log("Add to Order")
             res.redirect('/cart')
+
         })
     // req.user.addToOrder().then(result => {
     //     console.log("Add to Order")

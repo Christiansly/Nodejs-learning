@@ -6,7 +6,7 @@ exports.getProductPage = (req, res) => {
     // res.send('<form action="/admin/add-product" method="POST"><input type="text" name="title"></input><button>Submit</button></form>')
     // res.sendFile(path.join(routeDir, 'views', 'add-product.html'))
     res.render('admin/edit-product', {docTitle: "Add Product", path: "/admin/add-product", editing: false, activeProd: true, productCSS: true,
-    isLoggedIn: req.isLoggedIn})
+    isLoggedIn: req.session.isLoggedIn})
 }
 
 exports.postProductPage = (req, res) => {
@@ -48,7 +48,7 @@ exports.getEditProduct = (req, res) => {
             path: '/admin/edit-product',
             editing: edit,
             product: product,
-            isLoggedIn: req.isLoggedIn
+            isLoggedIn: req.session.isLoggedIn
         })
     })
 }
@@ -82,6 +82,6 @@ exports.postDeleteProduct = (req, res) => {
 exports.getProducts = (req, res) => {
     Product.find().then((products) => {
         res.render('admin/products', {prod: products, docTitle: 'Admin Product', path: '/admin/products', hasProducts: products.length > 0, activeShop: true,
-        isLoggedIn: req.isLoggedIn})
+        isLoggedIn: req.session.isLoggedIn})
     }).catch(err => console.log(err))
 }
