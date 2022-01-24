@@ -35,3 +35,12 @@ exports.postLogout = (req, res) => {
     })
 }
  
+exports.postSignup = (req, res) => {}
+
+exports.getSignup = (req, res) => {
+    res.render('auth/signup', {
+        path: '/signup',
+        docTitle: "Signup",
+        isLoggedIn: req.session.isLoggedIn
+    })
+}
