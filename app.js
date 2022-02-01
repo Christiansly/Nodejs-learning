@@ -38,7 +38,7 @@ app.use((req, res, next) => {
         console.log(req.session.user)
         next()
     } else {
-    User.findOne({email: req.session.user[0]['email']})
+    User.findOne({email: req.session.user['email']})
     .then(user => {
         req.user = user
         console.log('jhjhjj' ,user)
@@ -62,18 +62,18 @@ app.use(error404.get404)
 // })
 mongoose.connect(MONGO_URI)
 .then(result => {
-    User.findOne().then(user => {
-        if(!user) {
-            const user = new User({
-                username: 'Christian',
-                email: 'abiode23@gmail.com',
-                cart: {
-                    items: []
-                }
-            })
-            user.save()
-        }
-    })
+    // User.findOne().then(user => {
+    //     if(!user) {
+    //         const user = new User({
+    //             username: 'Christian',
+    //             email: 'abiode23@gmail.com',
+    //             cart: {
+    //                 items: []
+    //             }
+    //         })
+    //         user.save()
+    //     }
+    // })
     
     app.listen(3000)
     console.log('Connected ')

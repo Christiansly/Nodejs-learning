@@ -3,11 +3,11 @@ const mongoose = require('mongoose')
 const schema = mongoose.Schema
 
 const userSchema = new schema({
-    username: {
+    email: {
         type: String,
         required: true
     },
-    email: {
+    password: {
         type: String,
         required: true
     },
