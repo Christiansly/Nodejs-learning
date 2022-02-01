@@ -4,7 +4,10 @@ const { getDB } = require('../util/database')
 
 exports.getProductPage = (req, res) => {
     // res.send('<form action="/admin/add-product" method="POST"><input type="text" name="title"></input><button>Submit</button></form>')
-    // res.sendFile(path.join(routeDir, 'views', 'add-product.html'))
+    // res.sendFile(path.join(routeDir, 'views', 'add-product.html'))/
+    // if(!req.session.isLoggedIn) {
+    //     return res.redirect('/login')
+    // }
     res.render('admin/edit-product', {docTitle: "Add Product", path: "/admin/add-product", editing: false, activeProd: true, productCSS: true,
     isLoggedIn: req.session.isLoggedIn})
 }
