@@ -17,7 +17,7 @@ const csurf = require('csurf')
 const { readdirSync } = require('fs')
 const MongoDBStore = require('connect-mongodb-session')(session)
 const MONGO_URI = "mongodb+srv://admin:admin@cluster0.qfbbp.mongodb.net/shop?retryWrites=true&w=majority"
-
+const flash = require('connect-flash')
 
 const app = express()
 const store = new MongoDBStore({
@@ -51,6 +51,7 @@ app.use((req, res, next) => {
         .catch(err => console.log(err))
     }
 })
+app.use(flash())
 app.use((req, res, next) => {
     res.locals.isLoggedIn = req.session.isLoggedIn
     res.locals.csrfToken = req.csrfToken()
