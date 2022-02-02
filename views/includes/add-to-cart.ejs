@@ -2,5 +2,6 @@
     <% if (isLoggedIn) { %>
     <button type="submit" class="btn" >Add to Cart</button>
     <% } %>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
     <input type="hidden" name="productId" value="<%= product._id %>">
 </form>  
