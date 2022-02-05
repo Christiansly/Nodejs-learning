@@ -60,15 +60,18 @@ exports.postEditProduct = (req, res) => {
     const {productId, title, price, description, imageUrl} = req.body
 
     Product.findById(productId).then(product => {
+        if(product.userId !== req.user._id) {
+            return res.redirect('/')
+        }
         product.title = title
         product.price = price
         product.description = description
         product.imageUrl = imageUrl
-        return product.save()
+        return product.save().then(result => {
+            console.log("Updated")
+            res.redirect('/admin/products')
+        })
         
-    }).then(result => {
-        console.log("Updated")
-        res.redirect('/admin/products')
     }).catch(err => {
         console.log(err)
     })
@@ -78,12 +81,13 @@ exports.postEditProduct = (req, res) => {
 exports.postDeleteProduct = (req, res) => {
     const {productId} = req.body
     console.log(productId)
-    Product.findByIdAndRemove(productId).then(() => res.redirect('/admin/products')).catch((err) => console.log(err))
+    // Product.findByIdAndRemove(productId).then(() => res.redirect('/admin/products')).catch((err) => console.log(err))
+    Product.deleteOne({_id: productId, userId: req.user._id}).then(() => res.redirect('/admin/products')).catch((err) => console.log(err))
     
 }
 
 exports.getProducts = (req, res) => {
-    Product.find().then((products) => {
+    Product.find({userId: req.user._id}).then((products) => {
         res.render('admin/products', {prod: products, docTitle: 'Admin Product', path: '/admin/products', hasProducts: products.length > 0, activeShop: true,
         isLoggedIn: req.session.isLoggedIn})
     }).catch(err => console.log(err))
