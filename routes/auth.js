@@ -27,10 +27,12 @@ router.post(
     ).custom((value, { req }) => {
       return user.findOne({ email: req.body.email }).then((user) => {
         return bcrypt.compare(value, user.password).then((isMatched) => {
-            if(!isMatched) {
-                return Promise.reject("Password Incorrect, you can try the reset function")
-            }
-        })
+          if (!isMatched) {
+            return Promise.reject(
+              "Password Incorrect, you can try the reset function"
+            );
+          }
+        });
       });
     }),
   ],
@@ -53,17 +55,20 @@ router.post(
             );
           }
         });
-      }),
-    body(
-      "password",
-      "Please password can not be lesser than 6 character"
-    ).isLength({ min: 5 }),
-    body("confirmPassword").custom((value, { req }) => {
-      if (value !== req.body.password) {
-        throw new Error("Password have to match!");
-      }
-      return true;
-    }),
+      })
+      .trim()
+      .normalizeEmail(),
+    body("password", "Please password can not be lesser than 6 character")
+      .isLength({ min: 5 })
+      .trim(),
+    body("confirmPassword")
+      .custom((value, { req }) => {
+        if (value !== req.body.password) {
+          throw new Error("Password have to match!");
+        }
+        return true;
+      })
+      .trim(),
   ],
   authController.postSignup
 );
