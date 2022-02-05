@@ -6,15 +6,18 @@ const nodemailer = require("nodemailer");
 const sendgridTransporter = require("nodemailer-sendgrid-transport");
 const crypto = require("crypto");
 const user = require("../models/user");
+const {validationResult} = require('express-validator')
 
 const transporter = nodemailer.createTransport(
   sendgridTransporter({
     auth: {
       api_keys:
-        "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",
+        "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",
     },
   })
 );
+
+
 
 exports.login = (req, res) => {
   console.log(req.session.isLoggedIn);
@@ -37,29 +40,39 @@ exports.login = (req, res) => {
 
 exports.postLogin = (req, res) => {
   const { email, password } = req.body;
+  const error = validationResult(req)
+  if (!error.isEmpty()) {
+    console.log('check error',error.array())
+    return res.status(422).render("auth/login", {
+      path: "/login",
+      docTitle: "Log-in",
+      isLoggedIn: req.session.isLoggedIn,
+      errorMessage: error.array()[0].msg
+    });
+  }
   // res.setHeader('Set-Cookie', 'loggedIn=true')
   User.findOne({ email: email })
     .then((user) => {
-      if (!user) {
-        req.flash("error", "Invalid Email");
-        return res.redirect("/login");
-      }
-      console.log("user", user, password);
-      bcrypt.compare(password, user.password).then((isMatched) => {
-        console.log("ismat", isMatched);
-        if (isMatched) {
-          console.log(isMatched);
+  //     if (!user) {
+  //       req.flash("error", "Invalid Email");
+  //       return res.redirect("/login");
+  //     }
+  //     console.log("user", user, password);
+  //     bcrypt.compare(password, user.password).then((isMatched) => {
+  //       console.log("ismat", isMatched);
+        // if (isMatched) {
+        //   console.log(isMatched);
           req.session.isLoggedIn = true;
           req.session.user = user;
           return req.session.save((err) => {
             console.log("err", err);
             res.redirect("/");
           });
-        }
-        req.flash("error", "Password not correct");
-        res.redirect("/login");
-      });
-    })
+        })
+        // req.flash("error", "Password not correct");
+        // res.redirect("/login");
+      // });
+    // })
     .catch((err) => console.log(err));
 };
 
@@ -71,33 +84,42 @@ exports.postLogout = (req, res) => {
 
 exports.postSignup = (req, res) => {
   const { email, password, confirmPassword } = req.body;
-  User.findOne({ email: email })
-    .then((result) => {
-      if (result) {
-        req.flash("error", "Email already exist");
-        return res.redirect("/signup");
-      }
-      if (password !== confirmPassword) {
-        req.flash(
-          "error",
-          "Password dont match, please input passwords correctly"
-        );
-        return res.redirect("/signup");
-      }
-      return bcrypt.hash(password, 12).then((hashPassword) => {
+  const error = validationResult(req)
+  if (!error.isEmpty()) {
+    console.log('check error',error.array())
+    return res.status(422).render("auth/signup", {
+      path: "/signup",
+      docTitle: "Signup",
+      isLoggedIn: req.session.isLoggedIn,
+      errorMessage: error.array()[0].msg
+    });
+  }
+  // User.findOne({ email: email })
+  //   .then((result) => {
+  //     if (result) {
+  //       req.flash("error", "Email already exist");
+  //       return res.redirect("/signup");
+  //     }
+  //     if (password !== confirmPassword) {
+  //       req.flash(
+  //         "error",
+  //         "Password dont match, please input passwords correctly"
+  //       );
+  //       return res.redirect("/signup");
+  //     }
+      bcrypt.hash(password, 12).then((hashPassword) => {
         const user = new User({
           email: email,
           password: hashPassword,
           cart: { items: [] },
         });
         return user.save();
-      });
-    })
+      })
     .then(() => {
       res.redirect("/login");
       return transporter.sendMail({
         to: email,
-        from: "myshop@node.com",
+        from: "abiode23@gmail.com",
         subject: "Signup succeeded",
         html: "<h1>You successfully signed up</h1>",
       });

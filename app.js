@@ -37,7 +37,7 @@ app.use(csrfProtection)
 
 app.use((req, res, next) => {
     console.log(req.session.user)
-    if(req.session.user === undefined) {
+    if(req.session.user === undefined || req.session.user === null) {
         console.log(req.session.user)
         next()
     } else {
