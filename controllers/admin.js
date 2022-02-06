@@ -2,7 +2,7 @@ const { ObjectId } = require("mongodb");
 const Product = require("../models/product");
 const { getDB } = require("../util/database");
 
-exports.getProductPage = (req, res) => {
+exports.getProductPage = (req, res, next) => {
   // res.send('<form action="/admin/add-product" method="POST"><input type="text" name="title"></input><button>Submit</button></form>')
   // res.sendFile(path.join(routeDir, 'views', 'add-product.html'))/
   // if(!req.session.isLoggedIn) {
@@ -18,8 +18,9 @@ exports.getProductPage = (req, res) => {
   });
 };
 
-exports.postProductPage = (req, res) => {
+exports.postProductPage = (req, res, next) => {
   const { title, price, description } = req.body;
+  console.log("error 1111")
   const imageUrl = req.file;
   console.log("image", imageUrl)
   let id;
@@ -44,7 +45,7 @@ exports.postProductPage = (req, res) => {
 
 //select() - choose the fields you want to get. populate() - get referemce model
 
-exports.getEditProduct = (req, res) => {
+exports.getEditProduct = (req, res, next) => {
   // res.send('<form action="/admin/add-product" method="POST"><input type="text" name="title"></input><button>Submit</button></form>')
   // res.sendFile(path.join(routeDir, 'views', 'add-product.html'))
 
@@ -69,7 +70,7 @@ exports.getEditProduct = (req, res) => {
     .catch((err) => next(new Error(err)));
 };
 
-exports.postEditProduct = (req, res) => {
+exports.postEditProduct = (req, res, next) => {
   const { productId, title, price, description, imageUrl } = req.body;
 
   Product.findById(productId)
@@ -89,7 +90,7 @@ exports.postEditProduct = (req, res) => {
     .catch((err) => next(new Error(err)));
 };
 
-exports.postDeleteProduct = (req, res) => {
+exports.postDeleteProduct = (req, res, next) => {
   const { productId } = req.body;
   console.log(productId);
   // Product.findByIdAndRemove(productId).then(() => res.redirect('/admin/products')).catch((err) => console.log(err))
@@ -98,7 +99,7 @@ exports.postDeleteProduct = (req, res) => {
     .catch((err) => next(new Error(err)));
 };
 
-exports.getProducts = (req, res) => {
+exports.getProducts = (req, res, next) => {
   Product.find({ userId: req.user._id })
     .then((products) => {
       res.render("admin/products", {

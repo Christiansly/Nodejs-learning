@@ -24,9 +24,16 @@ const fileStorage = multer.diskStorage({
         cb(null, 'images')
     },
     filename: (req, file, cb) => {
-        cb(null, file.filename + '-' + file.originalname)
+        cb(null, new Date().toISOString() + '-' + file.originalname)
     }
 })
+const filefilter = (req, file, cb) => {
+    if(file.mimetype === 'image/png' || file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg') {
+        cb(null, true)
+    } else {
+        cb(null, false)
+    }
+}
 const app = express()
 const store = new MongoDBStore({
     uri: MONGO_URI,
@@ -37,7 +44,7 @@ app.set('view engine', 'ejs')
 app.set('views', 'views')
 
 app.use(bodyParser.urlencoded({extended: false}))
-app.use(multer({storage: fileStorage}).single('image'))
+app.use(multer({storage: fileStorage, fileFilter: filefilter}).single('image'))
 app.use(express.static(path.join(__dirname, 'public')))
 app.use(session({secret: 'my secret', resave: false, saveUninitialized: false, store: store}))
 app.use(csrfProtection)
@@ -45,19 +52,19 @@ app.use(csrfProtection)
 
 
 app.use((req, res, next) => {
-    console.log(req.session.user)
+    // console.log(req.session.user)
     if(req.session.user === undefined || req.session.user === null) {
-        console.log(req.session.user)
+        // console.log(req.session.user)
         next()
     } else {
     User.findOne({email: req.session.user['email']})
     .then(user => {
         req.user = user
-        console.log('jhjhjj' ,user)
+        // console.log('jhjhjj' ,user)
         next()
         }
         )
-        .catch(err => console.log(err))
+        .catch(err => console.log('app error',err))
     }
 })
 app.use(flash())
@@ -80,7 +87,7 @@ app.use((error, req, res, next) => {
     res.status(500).render('500', {
         docTitle: '500',
         path: '/500',
-        isLoggedIn: req.isLoggedIn
+        isLoggedIn: req.session.isLoggedIn
     })
 })
 // mongoConnect(()=> {
