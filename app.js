@@ -18,7 +18,15 @@ const { readdirSync } = require('fs')
 const MongoDBStore = require('connect-mongodb-session')(session)
 const MONGO_URI = "mongodb+srv://admin:admin@cluster0.qfbbp.mongodb.net/shop?retryWrites=true&w=majority"
 const flash = require('connect-flash')
-
+const multer = require('multer')
+const fileStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'images')
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.filename + '-' + file.originalname)
+    }
+})
 const app = express()
 const store = new MongoDBStore({
     uri: MONGO_URI,
@@ -29,6 +37,7 @@ app.set('view engine', 'ejs')
 app.set('views', 'views')
 
 app.use(bodyParser.urlencoded({extended: false}))
+app.use(multer({storage: fileStorage}).single('image'))
 app.use(express.static(path.join(__dirname, 'public')))
 app.use(session({secret: 'my secret', resave: false, saveUninitialized: false, store: store}))
 app.use(csrfProtection)
@@ -62,8 +71,18 @@ app.use('/admin', adminRouter.routes)
 app.use(shopRouter)
 app.use(authRouter)
 
-app.use(error404.get404)
 
+app.get('/500', error404.get500);
+app.use(error404.get404)
+app.use((error, req, res, next) => {
+    // res.redirect('/500')
+    // console.log(req, 'isLoggedIn')
+    res.status(500).render('500', {
+        docTitle: '500',
+        path: '/500',
+        isLoggedIn: req.isLoggedIn
+    })
+})
 // mongoConnect(()=> {
 //     // console.log(client)
 //     app.listen(3000)

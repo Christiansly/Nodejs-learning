@@ -10,7 +10,7 @@ exports.getProducts = (req, res) => {
       path: "/products",
       isLoggedIn: req.session.isLoggedIn,
     });
-  });
+  }).catch((err) => next(new Error(err)));;
   // res.sendFile(path.join(routeDir, 'views', 'shop.html'))
 };
 
@@ -28,7 +28,7 @@ exports.getIndex = (req, res) => {
       
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => next(new Error(err)));
 };
 
 exports.getCart = (req, res) => {
@@ -43,7 +43,7 @@ exports.getCart = (req, res) => {
       products: prod,
       isLoggedIn: req.session.isLoggedIn,
     });
-  });
+  }).catch((err) => next(new Error(err)));;
 };
 
 exports.getCheckout = (req, res) => {
@@ -73,7 +73,7 @@ exports.getOrders = (req, res) => {
       total: total,
       isLoggedIn: req.session.isLoggedIn,
     });
-  });
+  }).catch((err) => next(new Error(err)));
 };
 
 exports.getProduct = (req, res) => {
@@ -89,7 +89,7 @@ exports.getProduct = (req, res) => {
         isLoggedIn: req.session.isLoggedIn,
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => next(new Error(err)));
 };
 
 exports.postCart = (req, res) => {
@@ -100,7 +100,7 @@ exports.postCart = (req, res) => {
       console.log(result);
       res.redirect("/cart");
     })
-    .catch((err) => console.log(err));
+    .catch((err) => next(new Error(err)));
 };
 
 exports.postCartDeleteProduct = (req, res) => {
@@ -108,7 +108,7 @@ exports.postCartDeleteProduct = (req, res) => {
   console.log(req.session.user);
   req.user.deleteCart(productId).then((prod) => {
     res.redirect("/cart");
-  });
+  }).catch((err) => next(new Error(err)));
 };
 
 exports.postOrder = (req, res) => {
@@ -131,7 +131,7 @@ exports.postOrder = (req, res) => {
     .then((result) => {
       console.log("Add to Order");
       res.redirect("/cart");
-    });
+    }).catch((err) => next(new Error(err)));
   // req.user.addToOrder().then(result => {
   //     console.log("Add to Order")
   //     res.redirect('/cart')

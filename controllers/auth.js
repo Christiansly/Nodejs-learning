@@ -203,9 +203,7 @@ exports.postReset = (req, res) => {
           `,
         });
       })
-      .catch((err) => {
-        console.log(err);
-      });
+      .catch((err) => next(new Error(err)));
   });
 };
 
@@ -227,9 +225,7 @@ exports.getNewPassword = (req, res, next) => {
         passwordToken: token,
       });
     })
-    .catch((err) => {
-      console.log(err);
-    });
+    .catch((err) => next(new Error(err)));
 };
 
 exports.postNewPassword = (req, res, next) => {
@@ -256,7 +252,5 @@ exports.postNewPassword = (req, res, next) => {
     .then((result) => {
       res.redirect("/login");
     })
-    .catch((err) => {
-      console.log(err);
-    });
+    .catch((err) => next(new Error(err)));
 };
