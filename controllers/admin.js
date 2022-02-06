@@ -21,7 +21,11 @@ exports.getProductPage = (req, res, next) => {
 exports.postProductPage = (req, res, next) => {
   const { title, price, description } = req.body;
   console.log("error 1111")
-  const imageUrl = req.file;
+  const image = req.file;
+  let imageUrl
+  if (image) {
+    imageUrl =  image.path
+  }
   console.log("image", imageUrl)
   let id;
   const product = new Product({
@@ -71,17 +75,23 @@ exports.getEditProduct = (req, res, next) => {
 };
 
 exports.postEditProduct = (req, res, next) => {
-  const { productId, title, price, description, imageUrl } = req.body;
-
+  const { productId, title, price, description } = req.body;
+  const image = req.file
+  console.log(image)
   Product.findById(productId)
     .then((product) => {
-      if (product.userId !== req.user._id) {
+      if (product.userId.toString() !== req.user._id.toString()) {
+        console.log(req.user._id, product.userId)
         return res.redirect("/");
+      
       }
       product.title = title;
       product.price = price;
       product.description = description;
-      product.imageUrl = imageUrl;
+      if (image) {
+        product.imageUrl = image.path;
+      }
+      
       return product.save().then((result) => {
         console.log("Updated");
         res.redirect("/admin/products");
