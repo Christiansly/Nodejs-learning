@@ -1,17 +1,19 @@
 const Cart = require("../models/cart");
 const Product = require("../models/product");
 const Order = require("../models/order");
-const path = require('path');
-const fs= require("fs");
+const path = require("path");
+const fs = require("fs");
 exports.getProducts = (req, res) => {
-  Product.find().then((products) => {
-    res.render("shop/product-list", {
-      prod: products,
-      docTitle: "All Products",
-      path: "/products",
-      isLoggedIn: req.session.isLoggedIn,
-    });
-  }).catch((err) => next(new Error(err)));;
+  Product.find()
+    .then((products) => {
+      res.render("shop/product-list", {
+        prod: products,
+        docTitle: "All Products",
+        path: "/products",
+        isLoggedIn: req.session.isLoggedIn,
+      });
+    })
+    .catch((err) => next(new Error(err)));
   // res.sendFile(path.join(routeDir, 'views', 'shop.html'))
 };
 
@@ -26,7 +28,6 @@ exports.getIndex = (req, res) => {
         path: "/",
         hasProducts: products.length > 0,
         activeShop: true,
-      
       });
     })
     .catch((err) => next(new Error(err)));
@@ -34,17 +35,20 @@ exports.getIndex = (req, res) => {
 
 exports.getCart = (req, res) => {
   console.log(req.user);
-  req.user.populate("cart.items.productId").then((user) => {
-    const prod = user.cart.items;
-    console.log(prod);
-    // console.log('get cart', prod)
-    res.render("shop/cart", {
-      path: "/cart",
-      docTitle: "Your Cart",
-      products: prod,
-      isLoggedIn: req.session.isLoggedIn,
-    });
-  }).catch((err) => next(new Error(err)));;
+  req.user
+    .populate("cart.items.productId")
+    .then((user) => {
+      const prod = user.cart.items;
+      console.log(prod);
+      // console.log('get cart', prod)
+      res.render("shop/cart", {
+        path: "/cart",
+        docTitle: "Your Cart",
+        products: prod,
+        isLoggedIn: req.session.isLoggedIn,
+      });
+    })
+    .catch((err) => next(new Error(err)));
 };
 
 exports.getCheckout = (req, res) => {
@@ -56,25 +60,27 @@ exports.getCheckout = (req, res) => {
 };
 
 exports.getOrders = (req, res) => {
-  Order.find({ "user.userId": req.session.user._id }).then((items) => {
-    let total = items
-      .map((item) => {
-        return item.products.reduce((prev, curr) => {
-          return curr.quantity * curr.product.price + prev;
+  Order.find({ "user.userId": req.session.user._id })
+    .then((items) => {
+      let total = items
+        .map((item) => {
+          return item.products.reduce((prev, curr) => {
+            return curr.quantity * curr.product.price + prev;
+          }, 0);
+        })
+        .reduce((prev, curr) => {
+          return prev + curr;
         }, 0);
-      })
-      .reduce((prev, curr) => {
-        return prev + curr;
-      }, 0);
-    console.log("items ---", total);
-    res.render("shop/orders", {
-      path: "/orders",
-      docTitle: "Orders",
-      orders: items,
-      total: total,
-      isLoggedIn: req.session.isLoggedIn,
-    });
-  }).catch((err) => next(new Error(err)));
+      console.log("items ---", total);
+      res.render("shop/orders", {
+        path: "/orders",
+        docTitle: "Orders",
+        orders: items,
+        total: total,
+        isLoggedIn: req.session.isLoggedIn,
+      });
+    })
+    .catch((err) => next(new Error(err)));
 };
 
 exports.getProduct = (req, res) => {
@@ -107,9 +113,12 @@ exports.postCart = (req, res) => {
 exports.postCartDeleteProduct = (req, res) => {
   const { productId } = req.body;
   console.log(req.session.user);
-  req.user.deleteCart(productId).then((prod) => {
-    res.redirect("/cart");
-  }).catch((err) => next(new Error(err)));
+  req.user
+    .deleteCart(productId)
+    .then((prod) => {
+      res.redirect("/cart");
+    })
+    .catch((err) => next(new Error(err)));
 };
 
 exports.postOrder = (req, res) => {
@@ -132,7 +141,8 @@ exports.postOrder = (req, res) => {
     .then((result) => {
       console.log("Add to Order");
       res.redirect("/cart");
-    }).catch((err) => next(new Error(err)));
+    })
+    .catch((err) => next(new Error(err)));
   // req.user.addToOrder().then(result => {
   //     console.log("Add to Order")
   //     res.redirect('/cart')
@@ -140,16 +150,28 @@ exports.postOrder = (req, res) => {
 };
 
 exports.getInvoice = (req, res, next) => {
-   const {orderId} = req.params
-   const invoiceName = "invoice-" + orderId + ".pdf"
-   const invoicePath = path.join('data', 'invoices', invoiceName)
-   fs.readFile(invoicePath, (err, data) => {
-     if(err) {
-       return next(err)
-     }
-     res.setHeader('Content-Type', 'application/pdf');
-     res.setHeader('Content-Disposition', 'inline; filename="' + invoiceName + '"')
-     res.send(data)
-   })
-   
-}
+  const { orderId } = req.params;
+  Order.findById(orderId)
+    .then((order) => {
+      if (!order) {
+        return next(new Error("No order found"));
+      }
+      if (order.user.userId.toString() !== req.user._id.toString()) {
+        return next(new Error("Unauthorized"));
+      }
+      const invoiceName = "invoice-" + orderId + ".pdf";
+      const invoicePath = path.join("data", "invoices", invoiceName);
+      fs.readFile(invoicePath, (err, data) => {
+        if (err) {
+          return next(err);
+        }
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader(
+          "Content-Disposition",
+          'inline; filename="' + invoiceName + '"'
+        );
+        res.send(data);
+      });
+    })
+    .catch();
+};
