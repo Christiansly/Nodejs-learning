@@ -1,6 +1,7 @@
 const { ObjectId } = require("mongodb");
 const Product = require("../models/product");
 const { getDB } = require("../util/database");
+const fileHelper = require("../util/file");
 
 exports.getProductPage = (req, res, next) => {
   // res.send('<form action="/admin/add-product" method="POST"><input type="text" name="title"></input><button>Submit</button></form>')
@@ -20,13 +21,13 @@ exports.getProductPage = (req, res, next) => {
 
 exports.postProductPage = (req, res, next) => {
   const { title, price, description } = req.body;
-  console.log("error 1111")
+  console.log("error 1111");
   const image = req.file;
-  let imageUrl
+  let imageUrl;
   if (image) {
-    imageUrl =  image.path
+    imageUrl = image.path;
   }
-  console.log("image", imageUrl)
+  console.log("image", imageUrl);
   let id;
   const product = new Product({
     title: title,
@@ -34,6 +35,7 @@ exports.postProductPage = (req, res, next) => {
     description: description,
     imageUrl: imageUrl,
     userId: req.user,
+    csrfToken: req.csrfToken(),
   });
   product
     .save()
@@ -42,7 +44,7 @@ exports.postProductPage = (req, res, next) => {
       res.redirect("/admin/products");
     })
     .catch((err) => {
-      console.log('debugging',err);
+      console.log("debugging", err);
       next(new Error(err));
     });
 };
@@ -76,22 +78,22 @@ exports.getEditProduct = (req, res, next) => {
 
 exports.postEditProduct = (req, res, next) => {
   const { productId, title, price, description } = req.body;
-  const image = req.file
-  console.log(image)
+  const image = req.file;
+  console.log(image);
   Product.findById(productId)
     .then((product) => {
       if (product.userId.toString() !== req.user._id.toString()) {
-        console.log(req.user._id, product.userId)
+        console.log(req.user._id, product.userId);
         return res.redirect("/");
-      
       }
+      fileHelper.deleteFile(product.imageUrl);
       product.title = title;
       product.price = price;
       product.description = description;
       if (image) {
         product.imageUrl = image.path;
       }
-      
+
       return product.save().then((result) => {
         console.log("Updated");
         res.redirect("/admin/products");
@@ -104,8 +106,22 @@ exports.postDeleteProduct = (req, res, next) => {
   const { productId } = req.body;
   console.log(productId);
   // Product.findByIdAndRemove(productId).then(() => res.redirect('/admin/products')).catch((err) => console.log(err))
-  Product.deleteOne({ _id: productId, userId: req.user._id })
-    .then(() => res.redirect("/admin/products"))
+  Product.findById(productId)
+    .then((prod) => {
+      console.log(prod, "Prod we want to delete")
+      if (!prod) {
+        console.log(prod, "jjjdjd")
+        return next(new Error("No product Found"));
+      }
+      console.log(prod.imageUrl)
+      fileHelper.deleteFile(prod.imageUrl);
+      console.log("After deleting image")
+      console.log(req.user._id)
+      return Product.deleteOne({ _id: productId, userId: req.user._id });
+    })
+    .then(() => {
+      console.log("Deleted")
+      res.redirect("/admin/products")})
     .catch((err) => next(new Error(err)));
 };
 

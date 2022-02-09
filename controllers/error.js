@@ -8,6 +8,7 @@ exports.get500 = (req, res, next) => {
     res.status(500).render('500', {
         docTitle: 'Error!',
         path: '/500',
-        isLoggedIn: req.session.isLoggedIn
+        isLoggedIn: req.session.isLoggedIn,
+        csrfToken: req.csrfToken()
       });
 }
