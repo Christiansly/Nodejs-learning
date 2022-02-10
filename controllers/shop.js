@@ -4,7 +4,10 @@ const Order = require("../models/order");
 const path = require("path");
 const fs = require("fs");
 const PDFKit = require("pdfkit")
-exports.getProducts = (req, res) => {
+
+const ITEMS_PER_PAGE = 2
+
+exports.getProducts = (req, res, next) => {
   Product.find()
     .then((products) => {
       res.render("shop/product-list", {
@@ -18,10 +21,13 @@ exports.getProducts = (req, res) => {
   // res.sendFile(path.join(routeDir, 'views', 'shop.html'))
 };
 
-exports.getIndex = (req, res) => {
+exports.getIndex = (req, res, next) => {
   // req.isLoggedIn = true
+  const page = req.query.page
   console.log("isLoggedIn", req.session.isLoggedIn);
   const products = Product.find()
+  .skip((page - 1) * ITEMS_PER_PAGE)
+  .limit(ITEMS_PER_PAGE)
     .then((products) => {
       res.render("shop/index", {
         prod: products,
@@ -34,7 +40,7 @@ exports.getIndex = (req, res) => {
     .catch((err) => next(new Error(err)));
 };
 
-exports.getCart = (req, res) => {
+exports.getCart = (req, res, next) => {
   console.log(req.user);
   req.user
     .populate("cart.items.productId")
@@ -60,7 +66,7 @@ exports.getCheckout = (req, res) => {
   });
 };
 
-exports.getOrders = (req, res) => {
+exports.getOrders = (req, res, next) => {
   Order.find({ "user.userId": req.session.user._id })
     .then((items) => {
       let total = items
@@ -84,7 +90,7 @@ exports.getOrders = (req, res) => {
     .catch((err) => next(new Error(err)));
 };
 
-exports.getProduct = (req, res) => {
+exports.getProduct = (req, res, next) => {
   console.log(req.params.productId);
   const prodId = req.params.productId;
   Product.findById(prodId)
@@ -100,7 +106,7 @@ exports.getProduct = (req, res) => {
     .catch((err) => next(new Error(err)));
 };
 
-exports.postCart = (req, res) => {
+exports.postCart = (req, res, next) => {
   const { productId } = req.body;
   Product.findById(productId)
     .then((prod) => req.user.addToCart(prod))
@@ -111,7 +117,7 @@ exports.postCart = (req, res) => {
     .catch((err) => next(new Error(err)));
 };
 
-exports.postCartDeleteProduct = (req, res) => {
+exports.postCartDeleteProduct = (req, res, next) => {
   const { productId } = req.body;
   console.log(req.session.user);
   req.user
@@ -122,7 +128,7 @@ exports.postCartDeleteProduct = (req, res) => {
     .catch((err) => next(new Error(err)));
 };
 
-exports.postOrder = (req, res) => {
+exports.postOrder = (req, res, next) => {
   req.user
     .populate("cart.items.productId")
     .then((user) => {
