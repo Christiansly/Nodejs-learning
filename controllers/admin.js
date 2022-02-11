@@ -25,6 +25,7 @@ exports.postProductPage = (req, res, next) => {
   const image = req.file;
   let imageUrl;
   if (image) {
+    console.log('hello')
     imageUrl = image.path;
   }
   console.log("image", imageUrl);

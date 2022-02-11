@@ -3,36 +3,88 @@ const Product = require("../models/product");
 const Order = require("../models/order");
 const path = require("path");
 const fs = require("fs");
-const PDFKit = require("pdfkit")
+const PDFKit = require("pdfkit");
 
-const ITEMS_PER_PAGE = 2
+const ITEMS_PER_PAGE = 1;
 
 exports.getProducts = (req, res, next) => {
+  // Product.find()
+  //   .then((products) => {
+  //     res.render("shop/product-list", {
+  //       prod: products,
+  //       docTitle: "All Products",
+  //       path: "/products",
+  //       isLoggedIn: req.session.isLoggedIn,
+  //     });
+  //   })
+  //   .catch((err) => next(new Error(err)));
+  const page = req.query.page ? +req.query.page : 1;
+  let totalItem;
   Product.find()
+    .countDocuments()
+    .then((numItem) => {
+      totalItem = numItem;
+      console.log(
+        "last page",
+        ITEMS_PER_PAGE,
+        totalItem,
+        Math.ceil(ITEMS_PER_PAGE / totalItem)
+      );
+      return Product.find()
+        .skip((page - 1) * ITEMS_PER_PAGE)
+        .limit(ITEMS_PER_PAGE);
+    })
     .then((products) => {
       res.render("shop/product-list", {
         prod: products,
         docTitle: "All Products",
         path: "/products",
-        isLoggedIn: req.session.isLoggedIn,
+        totalProducts: totalItem,
+        hasNextPage: page * ITEMS_PER_PAGE < totalItem,
+        hasPreviousPage: page > 1,
+        currentPage: page,
+        nextPage: page + 1,
+        previousPage: page - 1,
+        lastPage: Math.ceil(totalItem / ITEMS_PER_PAGE),
+        hasProducts: products.length > 0,
+        activeShop: true,
       });
     })
     .catch((err) => next(new Error(err)));
-  // res.sendFile(path.join(routeDir, 'views', 'shop.html'))
 };
+// res.sendFile(path.join(routeDir, 'views', 'shop.html'))
 
 exports.getIndex = (req, res, next) => {
   // req.isLoggedIn = true
-  const page = req.query.page
-  console.log("isLoggedIn", req.session.isLoggedIn);
-  const products = Product.find()
-  .skip((page - 1) * ITEMS_PER_PAGE)
-  .limit(ITEMS_PER_PAGE)
+  const page = req.query.page ? +req.query.page : 1;
+  let totalItem;
+  // console.log("isLoggedIn", req.session.isLoggedIn);
+  Product.find()
+    .countDocuments()
+    .then((numItem) => {
+      totalItem = numItem;
+      console.log(
+        "last page",
+        ITEMS_PER_PAGE,
+        totalItem,
+        Math.ceil(ITEMS_PER_PAGE / totalItem)
+      );
+      return Product.find()
+        .skip((page - 1) * ITEMS_PER_PAGE)
+        .limit(ITEMS_PER_PAGE);
+    })
     .then((products) => {
       res.render("shop/index", {
         prod: products,
         docTitle: "Shop",
         path: "/",
+        totalProducts: totalItem,
+        hasNextPage: page * ITEMS_PER_PAGE < totalItem,
+        hasPreviousPage: page > 1,
+        currentPage: page,
+        nextPage: page + 1,
+        previousPage: page - 1,
+        lastPage: Math.ceil(totalItem / ITEMS_PER_PAGE),
         hasProducts: products.length > 0,
         activeShop: true,
       });
@@ -187,21 +239,29 @@ exports.getInvoice = (req, res, next) => {
         "Content-Disposition",
         'inline; filename="' + invoiceName + '"'
       );
-      const pdfDoc = new PDFKit()
-      pdfDoc.pipe(fs.createWriteStream(invoicePath))
-      pdfDoc.pipe(res)
-      pdfDoc.fontSize(26).text('Invoice', {
-        underline: true
-      })
-      pdfDoc.text('--------------------------------------------')
-      let totalPrice = 0
-      order.products.forEach(prod => {
-        totalPrice += prod.quantity * prod.product.price
-        pdfDoc.fontSize(14).text(prod.product.title + " - " + prod.quantity + " x " + prod.product.price)
-        pdfDoc.text("Total Price: $" + totalPrice)
-      })
-      pdfDoc.end()
+      const pdfDoc = new PDFKit();
+      pdfDoc.pipe(fs.createWriteStream(invoicePath));
+      pdfDoc.pipe(res);
+      pdfDoc.fontSize(26).text("Invoice", {
+        underline: true,
+      });
+      pdfDoc.text("--------------------------------------------");
+      let totalPrice = 0;
+      order.products.forEach((prod) => {
+        totalPrice += prod.quantity * prod.product.price;
+        pdfDoc
+          .fontSize(14)
+          .text(
+            prod.product.title +
+              " - " +
+              prod.quantity +
+              " x " +
+              prod.product.price
+          );
+        pdfDoc.text("Total Price: $" + totalPrice);
+      });
+      pdfDoc.end();
       // file.pipe(res)
     })
-    .catch(err => next(err));
+    .catch((err) => next(err));
 };

@@ -24,10 +24,12 @@
                         <div class="card__actions">
                             <a href="/products/<%= product._id %>" class="btn">Details</a>
                             <%- include('../includes/add-to-cart.ejs', {product: product}) %>
+                            
                         </div>
                     </article>
                 <% } %>
             </div>
+            <%- include('../includes/pagination.ejs') %>
         <% } else { %>
             <h1>No Products Found!</h1>
         <% } %>
