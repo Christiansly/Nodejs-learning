@@ -25,7 +25,7 @@ exports.postProductPage = (req, res, next) => {
   const image = req.file;
   let imageUrl;
   if (image) {
-    console.log('hello')
+    console.log("hello");
     imageUrl = image.path;
   }
   console.log("image", imageUrl);
@@ -103,27 +103,23 @@ exports.postEditProduct = (req, res, next) => {
     .catch((err) => next(new Error(err)));
 };
 
-exports.postDeleteProduct = (req, res, next) => {
-  const { productId } = req.body;
-  console.log(productId);
-  // Product.findByIdAndRemove(productId).then(() => res.redirect('/admin/products')).catch((err) => console.log(err))
-  Product.findById(productId)
-    .then((prod) => {
-      console.log(prod, "Prod we want to delete")
-      if (!prod) {
-        console.log(prod, "jjjdjd")
-        return next(new Error("No product Found"));
+exports.deleteProduct = (req, res, next) => {
+  const prodId = req.params.productId;
+  Product.findById(prodId)
+    .then(product => {
+      if (!product) {
+        return next(new Error('Product not found.'));
       }
-      console.log(prod.imageUrl)
-      fileHelper.deleteFile(prod.imageUrl);
-      console.log("After deleting image")
-      console.log(req.user._id)
-      return Product.deleteOne({ _id: productId, userId: req.user._id });
+      fileHelper.deleteFile(product.imageUrl);
+      return Product.deleteOne({ _id: prodId, userId: req.user._id });
     })
     .then(() => {
-      console.log("Deleted")
-      res.redirect("/admin/products")})
-    .catch((err) => next(new Error(err)));
+      console.log('DESTROYED PRODUCT');
+      res.status(200).json({ message: 'Success!' });
+    })
+    .catch(err => {
+      res.status(500).json({ message: 'Deleting product failed.' });
+    });
 };
 
 exports.getProducts = (req, res, next) => {
